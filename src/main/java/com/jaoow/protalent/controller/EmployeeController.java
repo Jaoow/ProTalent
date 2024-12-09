@@ -1,6 +1,7 @@
 package com.jaoow.protalent.controller;
 
 import com.jaoow.protalent.dto.EmployeeDTO;
+import com.jaoow.protalent.dto.EmployeeFilterDTO;
 import com.jaoow.protalent.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,9 +35,8 @@ public class EmployeeController {
     @Operation(summary = "Get all employees", description = "Retrieves a list of all employees")
     @ApiResponse(responseCode = "200", description = "List of all employees")
     @GetMapping
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
-        List<EmployeeDTO> employees = employeeService.getAllEmployees();
-        return ResponseEntity.ok(employees);
+    public List<EmployeeDTO> getAllEmployees() {
+        return employeeService.getAllEmployees();
     }
 
     @Operation(summary = "Get employee by ID", description = "Retrieves an employee by its ID")
@@ -50,17 +50,26 @@ public class EmployeeController {
         return employee.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Search employees by name and skill", description = "Search employees by optional name and skill parameters")
-    @ApiResponse(responseCode = "200", description = "List of employees matching the search criteria")
-    @GetMapping("/search")
-    public ResponseEntity<List<EmployeeDTO>> searchEmployees(
-            @Parameter(description = "Name of the employee to search for")
-            @RequestParam(required = false) String name,
-            @Parameter(description = "Skill to search for in employees' technical skills")
-            @RequestParam(required = false) String skill) {
-        log.info("Searching employees by name: {} and skill: {}", name, skill);
-        List<EmployeeDTO> employees = employeeService.searchEmployees(name, skill);
-        return ResponseEntity.ok(employees);
+    @Operation(summary = "Update an employee", description = "Updates an employee in the system by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Employee successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Employee not found")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeDTO> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employeeDTO) {
+        EmployeeDTO updatedEmployee = employeeService.updateEmployee(id, employeeDTO);
+        return ResponseEntity.ok(updatedEmployee);
+    }
+
+    @Operation(summary = "Filter employees", description = "Retrieves a list of employees based on the provided filter")
+    @ApiResponse(responseCode = "200", description = "List of filtered employees")
+    @Parameter(name = "filterDTO", description = "Filter to apply to the employees list", required = true)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of filtered employees")
+    })
+    @PostMapping("/filter")
+    public List<EmployeeDTO> getFilteredEmployees(@RequestBody EmployeeFilterDTO filterDTO) {
+        return employeeService.getFilteredEmployees(filterDTO);
     }
 
     @Operation(summary = "Delete an employee", description = "Deletes an employee from the system by its ID")

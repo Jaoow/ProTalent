@@ -20,7 +20,7 @@ public class Certification {
     private Long id;
 
     @Column(nullable = false)
-    private String certificationName;
+    private String certificationName; // TODO: rename to 'name'
 
     private String issuingOrganization;
 
