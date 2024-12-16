@@ -1,5 +1,6 @@
 package com.jaoow.protalent.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -9,8 +10,10 @@ public class CertificationDTO {
 
     private Long id;
 
+    @NotBlank
     private String certificationName;
 
+    @NotBlank
     private String issuingOrganization;
 
     private LocalDate issueDate;

@@ -2,11 +2,11 @@ package com.jaoow.protalent.service;
 
 import com.jaoow.protalent.dto.EmployeeDTO;
 import com.jaoow.protalent.dto.EmployeeFilterDTO;
-import com.jaoow.protalent.dto.TechnicalSkillDTO;
 import com.jaoow.protalent.exception.EmailAlreadyInUseException;
 import com.jaoow.protalent.exception.EmployeeNotFoundException;
 import com.jaoow.protalent.model.Certification;
 import com.jaoow.protalent.model.Employee;
+import com.jaoow.protalent.model.Language;
 import com.jaoow.protalent.model.TechnicalSkill;
 import com.jaoow.protalent.repository.EmployeeRepository;
 import com.jaoow.protalent.specification.EmployeeSpecification;
@@ -59,13 +59,14 @@ public class EmployeeService {
 
     @CacheEvict(value = "employees", allEntries = true)
     public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
-        if (employeeRepository.existsByEmail(employeeDTO.getEmail())) {
+        if (employeeRepository.existsByEmailIgnoreCase(employeeDTO.getEmail())) {
             throw new EmailAlreadyInUseException(employeeDTO.getEmail());
         }
 
         Employee employee = modelMapper.map(employeeDTO, Employee.class);
         employee.getTechnicalSkills().forEach(technicalSkill -> technicalSkill.setEmployee(employee));
         employee.getCertifications().forEach(certification -> certification.setEmployee(employee));
+        employee.getLanguages().forEach(language -> language.setEmployee(employee));
 
         Employee savedEmployee = employeeRepository.save(employee);
         return modelMapper.map(savedEmployee, EmployeeDTO.class);
@@ -76,7 +77,8 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
 
-        if (!employee.getEmail().equals(employeeDTO.getEmail()) && employeeRepository.existsByEmail(employeeDTO.getEmail())) {
+        if (!employee.getEmail().equals(employeeDTO.getEmail())
+                && employeeRepository.existsByEmailIgnoreCase(employeeDTO.getEmail())) {
             throw new EmailAlreadyInUseException(employeeDTO.getEmail());
         }
 
@@ -101,6 +103,14 @@ public class EmployeeService {
 
         employee.getCertifications().clear();
         employee.getCertifications().addAll(updatedCertifications);
+
+        List<Language> updatedLanguages = employeeDTO.getLanguages().stream()
+                .map(languageDTO -> modelMapper.map(languageDTO, Language.class))
+                .peek(language -> language.setEmployee(employee))
+                .toList();
+
+        employee.getLanguages().clear();
+        employee.getLanguages().addAll(updatedLanguages);
 
         Employee updatedEmployee = employeeRepository.save(employee);
         return modelMapper.map(updatedEmployee, EmployeeDTO.class);

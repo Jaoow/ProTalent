@@ -1,33 +1,28 @@
 package com.jaoow.protalent.model;
 
-import com.jaoow.protalent.enums.TechnicalProficiencyLevel;
+import com.jaoow.protalent.enums.LanguageProficiencyLevel;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class TechnicalSkill {
+public class Language {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String skillName;
+    private String languageName;
 
     @Column(nullable = false)
     @Enumerated(EnumType.ORDINAL) // Usar ORDINAL para podemos comparar os valores de forma mais eficiente
-    private TechnicalProficiencyLevel proficiencyLevel;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    private LanguageProficiencyLevel proficiencyLevel;
+    
+    @ManyToOne
     @JoinColumn(name = "employee_id")
-    @ToString.Exclude
     private Employee employee;
-
 }

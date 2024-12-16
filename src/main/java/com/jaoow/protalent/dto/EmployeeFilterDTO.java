@@ -9,5 +9,6 @@ public class EmployeeFilterDTO {
     private String contact;
     private String technicalSkill;
     private String certification;
+    private String language;
     private Integer minExperienceYears;
 }

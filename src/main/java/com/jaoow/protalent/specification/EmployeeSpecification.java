@@ -1,12 +1,15 @@
 package com.jaoow.protalent.specification;
 
 import com.jaoow.protalent.dto.EmployeeFilterDTO;
+import com.jaoow.protalent.enums.LanguageProficiencyLevel;
 import com.jaoow.protalent.model.Employee;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 
+@Slf4j
 public class EmployeeSpecification {
 
     public static Specification<Employee> filter(EmployeeFilterDTO filterDTO) {
@@ -44,6 +47,12 @@ public class EmployeeSpecification {
                         applyLikeForMultipleValues(filterDTO.getCertification(), root, criteriaBuilder, "certifications", "certificationName"));
             }
 
+            if (filterDTO.getLanguage() != null) {
+                query.distinct(true);
+                predicate = criteriaBuilder.and(predicate,
+                        applyLanguageFilter(filterDTO.getLanguage(), root, criteriaBuilder));
+            }
+
             return predicate;
         };
     }
@@ -61,5 +70,29 @@ public class EmployeeSpecification {
             }
         }
         return predicate;
+    }
+
+    private static Predicate applyLanguageFilter(String value, Root<Employee> root, CriteriaBuilder criteriaBuilder) {
+        String[] languageData = value.split("-");
+        String languageName = languageData[0].trim();
+
+        Predicate nameCriteria = criteriaBuilder.equal(criteriaBuilder.lower(root.join("languages").get("languageName")), languageName.toLowerCase());
+        if (languageData.length < 2) {
+            return nameCriteria;
+        }
+
+        String proficiencyLevel = languageData[1].trim();
+
+        LanguageProficiencyLevel level = LanguageProficiencyLevel.getLanguageProficiencyLevel(proficiencyLevel.toUpperCase());
+        if (level == null) {
+            return nameCriteria;
+        }
+
+        int levelOrdinal = level.ordinal();
+
+        return criteriaBuilder.and(
+                nameCriteria,
+                criteriaBuilder.greaterThanOrEqualTo(root.join("languages").get("proficiencyLevel"), levelOrdinal)
+        );
     }
 }

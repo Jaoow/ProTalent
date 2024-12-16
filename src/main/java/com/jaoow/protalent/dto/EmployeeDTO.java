@@ -27,6 +27,8 @@ public class EmployeeDTO {
 
     private List<CertificationDTO> certifications;
 
+    private List<LanguageDto> languages;
+
     private int experienceYears;
 
     private String linkedinUrl;
@@ -34,5 +36,6 @@ public class EmployeeDTO {
     public EmployeeDTO() {
         this.technicalSkills = new ArrayList<>();
         this.certifications = new ArrayList<>();
+        this.languages = new ArrayList<>();
     }
 }

@@ -29,11 +29,17 @@ public class Employee {
     @Column(nullable = false, unique = true)
     private String contact;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<TechnicalSkill> technicalSkills = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Certification> certifications = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Language> languages = new ArrayList<>();
 
     private int experienceYears;
 
